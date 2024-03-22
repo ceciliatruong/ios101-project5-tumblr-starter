@@ -6,14 +6,40 @@
 import UIKit
 import Nuke
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return posts.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        // Create the cell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell", for: indexPath) as! PostCell
 
+        let post = posts[indexPath.row]
 
+        cell.summaryLabel.text = post.summary
+        
+        print("post.summary: \(post.summary)")
+        print("cell.summaryLabel.text: \(cell.summaryLabel.text)")
+        
+        if let photo = post.photos.first, let imageView = cell.postImageView {
+            let url = photo.originalSize.url
+            Nuke.loadImage(with: url, into: imageView)
+        }
+
+        // Return the cell for use in the respective table view row
+        return cell
+    }
+    
+
+    @IBOutlet weak var tableView: UITableView!
+    private var posts: [Post] = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
         
         fetchPosts()
+        tableView.dataSource = self
     }
 
 
@@ -48,6 +74,9 @@ class ViewController: UIViewController {
                     for post in posts {
                         print("🍏 Summary: \(post.summary)")
                     }
+                    self?.posts = posts
+                    self?.tableView.reloadData()
+
                 }
 
             } catch {
